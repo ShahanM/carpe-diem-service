@@ -17,7 +17,7 @@ dev = [
 
 [tool.ruff]
 # Set the maximum line length (standard is 88, matching Black)
-line-length = 88
+line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]

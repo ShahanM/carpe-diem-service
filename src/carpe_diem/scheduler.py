@@ -1,10 +1,11 @@
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 
 from carpe_diem.models import CalendarEventSchema, ItemType, Task, TimelineItem
 
 
 def resolve_timeline(
-    events: list[CalendarEventSchema],
+    events: Iterable[CalendarEventSchema],
     all_tasks: list[Task],
     cushion_mins: int = 5,
     default_task_duration: int = 15,
@@ -15,9 +16,7 @@ def resolve_timeline(
     """
     timeline: list[TimelineItem] = []
 
-    standalone_tasks = [
-        t for t in all_tasks if t.parent_event_id is None and not t.completed
-    ]
+    standalone_tasks = [t for t in all_tasks if t.parent_event_id is None and not t.completed]
     sorted_events = sorted(events, key=lambda x: x.start_time)
 
     # Use current time as the starting point for scheduling
@@ -29,9 +28,7 @@ def resolve_timeline(
     for event in sorted_events:
         # Fill Gaps Before This Event
         # We check if there's enough space for at least one task + cushion
-        while (
-            standalone_tasks and (current_time + task_dur + cushion) <= event.start_time
-        ):
+        while standalone_tasks and (current_time + task_dur + cushion) <= event.start_time:
             task = standalone_tasks.pop(0)
             timeline.append(
                 TimelineItem(
