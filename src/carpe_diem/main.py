@@ -14,7 +14,7 @@ app = FastAPI(title="Carpe Diem Sidecar")
 async def get_timeline(date: dt.date | None = None):
     if date is None:
         date = dt.datetime.now().date()
-
+    print(date)
     fetcher = EDSCalendarFetcher()
     events = await fetcher.fetch_events(date)
 
