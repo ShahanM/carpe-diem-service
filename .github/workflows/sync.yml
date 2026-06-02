@@ -1,0 +1,33 @@
+name: 6-Hour Calendar Sync
+
+on:
+    schedule:
+        - cron: "0 */6 * * *"
+    workflow_dispatch:
+
+jobs:
+    sync-calendar:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v3
+              with:
+                  version: "latest"
+
+            - name: Set up Python
+              run: uv python install 3.11
+
+            - name: Install Dependencies
+              run: uv sync
+
+            - name: Execute Sync Engine
+              run: uv run python scripts/sync_outlook_to_gmail.py
+              env:
+                  ICS_URL: ${{ secrets.ICS_URL }}
+                  GCP_CREDENTIALS_B64: ${{ secrets.GCP_CREDENTIALS_B64 }}
+                  GCP_TOKEN_B64: ${{ secrets.GCP_TOKEN_B64 }}
+                  TARGET_CALENDAR_ID: ${{ secrets.TARGET_CALENDAR_ID }}

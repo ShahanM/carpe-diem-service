@@ -4,7 +4,18 @@ version = "0.1.0"
 description = "A FastAPI sidecar for the Carpe Diem COSMIC applet."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["fastapi", "uvicorn", "sdbus", "icalendar"]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "sdbus",
+    "icalendar",
+    "google-api-python-client>=2.197.0",
+    "google-auth-httplib2>=0.4.0",
+    "google-auth-oauthlib>=1.4.0",
+    "pandas>=3.0.3",
+    "python-dotenv>=1.2.2",
+    "horadric-lib",
+]
 
 [dependency-groups]
 dev = [
@@ -16,7 +27,6 @@ dev = [
 ]
 
 [tool.ruff]
-# Set the maximum line length (standard is 88, matching Black)
 line-length = 120
 target-version = "py311"
 
@@ -33,3 +43,6 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
 addopts = "-ra -q"
+
+[tool.uv.sources]
+horadric-lib = { git = "https://github.com/ShahanM/horadric-lib" }
