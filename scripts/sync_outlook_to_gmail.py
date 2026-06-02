@@ -125,7 +125,15 @@ def parse_ics_to_google_payloads(ics_text, past_limit, future_limit):
     parsed_events = []
 
     for component in cal.walk("VEVENT"):
-        if component.get("RECURRENCE-ID") or str(component.get("STATUS", "")).upper() == "CANCELLED":
+        summary_upper = str(component.get("SUMMARY", "")).upper()
+        status = str(component.get("STATUS", "")).upper()
+
+        if (
+            component.get("RECURRENCE-ID")
+            or status == "CANCELLED"
+            or summary_upper.startswith("CANCELED:")
+            or summary_upper.startswith("CANCELLED:")
+        ):
             continue
 
         summary = str(component.get("summary", "No Title"))
