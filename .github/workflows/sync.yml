@@ -1,4 +1,4 @@
-name: 6-Hour Calendar Sync
+name: Calendar Sync
 
 on:
     schedule:
