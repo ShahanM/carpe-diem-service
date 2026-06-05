@@ -31,3 +31,4 @@ jobs:
                   GCP_CREDENTIALS_B64: ${{ secrets.GCP_CREDENTIALS_B64 }}
                   GCP_TOKEN_B64: ${{ secrets.GCP_TOKEN_B64 }}
                   TARGET_CALENDAR_ID: ${{ secrets.TARGET_CALENDAR_ID }}
+                  ADDITIONAL_ATTENDEE: ${{ secrets.ADDITIONAL_ATTENDEE }}

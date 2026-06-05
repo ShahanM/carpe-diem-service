@@ -19,6 +19,8 @@ logger = structlog.getLogger()
 
 load_dotenv()
 
+ADDITIONAL_ATTENDEE = os.environ.get("ADDITIONAL_ATTENDEE")
+
 SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/tasks.readonly"]
 
 LOCAL_TZ = tz.gettz("America/New_York")
@@ -205,6 +207,9 @@ def parse_ics_to_google_payloads(ics_text, past_limit, future_limit):
                 "location": location,
             }
 
+            if ADDITIONAL_ATTENDEE:
+                payload["attendees"] = [{"email": ADDITIONAL_ATTENDEE}]
+
             if is_all_day:
                 payload["start"] = {"date": final_start.strftime("%Y-%m-%d")}
                 payload["end"] = {"date": final_end.strftime("%Y-%m-%d")}
@@ -254,7 +259,7 @@ def sync_events(service, calendar_id, ics_events, google_events):
     for key in to_create:
         body = ics_map[key]
         try:
-            service.events().insert(calendarId=calendar_id, body=body).execute()
+            service.events().insert(calendarId=calendar_id, body=body, sendUpdates="none").execute()
             logger.info("[+] Created", key=key[0])
         except Exception as e:
             logger.error("[!] Failed to create", key=key[0], error=e)
@@ -266,11 +271,22 @@ def sync_events(service, calendar_id, ics_events, google_events):
         desc_changed = g_ev.get("description", "") != i_ev.get("description", "")
         loc_changed = g_ev.get("location", "") != i_ev.get("location", "")
 
-        if desc_changed or loc_changed:
+        attendees_changed = False
+        if ADDITIONAL_ATTENDEE:
+            g_attendees = [a.get("email", "") for a in g_ev.get("attendees", [])]
+            if ADDITIONAL_ATTENDEE not in g_attendees:
+                attendees_changed = True
+                current_attendees = g_ev.get("attendees", [])
+                current_attendees.append({"email": ADDITIONAL_ATTENDEE})
+                g_ev["attendees"] = current_attendees
+
+        if desc_changed or loc_changed or attendees_changed:
             g_ev["description"] = i_ev.get("description", "")
             g_ev["location"] = i_ev.get("location", "")
             try:
-                service.events().update(calendarId=calendar_id, eventId=g_ev["id"], body=g_ev).execute()
+                service.events().update(
+                    calendarId=calendar_id, eventId=g_ev["id"], body=g_ev, sendUpdates="none"
+                ).execute()
                 logger.info("[*] Updated", key=key[0])
             except Exception as e:
                 logger.error("[!] Failed to update", key=key[0], error=e)
